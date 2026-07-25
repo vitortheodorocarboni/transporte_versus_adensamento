@@ -1,0 +1,2 @@
+# SPTrans developer API token used by scripts/06_travel_times/06_01.R
+SPTRANS_API_TOKEN=replace_with_your_token
