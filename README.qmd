@@ -1,0 +1,991 @@
+﻿# Dissertation Project Handoff
+
+This is the canonical handoff file for Vitor Theodoro Carboni's master's
+dissertation workspace. It is meant to let a future Codex account understand
+the project state by reading this file together with the dissertation text.
+
+Read this file before changing code, reports, Git state, or dissertation text.
+It consolidates the practical guidance that used to be split across older
+agent notes and many prior Codex/Claude sessions.
+
+Last major handoff update: 2026-06-09.
+
+## Project in One Paragraph
+
+Vitor is an economist and master's student in Public Policy at Insper. This
+dissertation studies accessibility and urban welfare in Sao Paulo through a
+quantitative spatial equilibrium model, based on Ahlfeldt et al. (2015) and
+implemented with the IGC Cities Spatial Model / `IGC.CSM` workflow in R. The
+central empirical comparison is between two policy counterfactuals under a
+common R$ 10.3 billion budget: full operation of Line 6-Orange of the metro
+system, and a central land-use / densification intervention in the historic
+center. The thesis asks whether accessibility is better promoted by taking
+transport to the periphery or by allowing more housing and activity in the
+center, and compares the two in terms of welfare, spatial incidence,
+decomposition channels, and cost-benefit analysis.
+
+## How to Work with Vitor
+
+Vitor may write in English or Portuguese. Mirror the current chat/project
+language. The dissertation itself is in Portuguese.
+
+He prefers grounded, project-specific help. Inspect files before proposing
+changes. Preserve notation, variable names, folder structure, and the pipeline
+logic unless there is a concrete reason to change them. If there is tension
+between elegance and fidelity to the existing pipeline, choose fidelity.
+
+For repository-state questions and commits, verify the live Git state first.
+For methodology questions, answer from the actual code, data objects, reports,
+and dissertation text, not from generic definitions.
+
+If he asks for a report, notes, a PDF, or sendable text, create the durable
+artifact in the project rather than only answering in chat. If he explicitly
+says not to run scripts, stop after code edits and leave execution to him.
+
+If you find a real inconsistency, surface it clearly and propose the smallest
+reasonable fix. Do not silently work around it.
+
+## Active Root and Path Rule
+
+The active workspace in this session is:
+
+```text
+C:/Users/vitor/OneDrive - Insper - Institudo de Ensino e Pesquisa/Documentos/Insper/Mestrado/Dissertacao
+```
+
+The real Windows folder name contains a cedilla and tilde in `Dissertacao`.
+Console output may render that word as mojibake; do not assume the file is
+corrupt from that alone.
+
+Do not hard-code this absolute path in R scripts. Source the path helper:
+
+```r
+source(file.path("scripts", "_config", "paths.R"))
+```
+
+Then use:
+
+```r
+project_path(...)
+data_path(...)
+raw_path(...)
+processed_path(...)
+results_path(...)
+scripts_path(...)
+read_geoparquet_sf(...)
+```
+
+`paths.R` finds the project root from the `.here` marker and creates the main
+data folders if needed. It also defines `read_geoparquet_sf()` because
+`arrow::read_parquet()` returns GeoParquet geometry as `geoarrow_vctr`, which
+must be converted back to `sf` before spatial operations.
+
+## Current Top-Level Structure
+
+Live root contents observed on 2026-06-09 include:
+
+```text
+.claude/                 local Claude state, ignored
+.codex_tmp/              local Codex cache, ignored
+.git/
+data/                    selected reproducibility data tracked; additions ignored
+igc/                     IGC demo/reference material
+literature/              PDFs and references, ignored
+paper/                   dissertation text, maps, plots, extracted text
+presentation/            presentation material
+qgis/                    versioned QGIS project, layers, scripts, and templates
+reports/                 audit reports, tables, figures, report caches, report scripts
+scripts/                 R pipeline scripts
+README.qmd                this project handoff file
+Dissertacao.Rproj
+.gitignore
+.here
+```
+
+Important: older handoff notes may refer to `paper/reports`,
+`paper/dissertation`, `presentations`, `qgis_projects`, `Dados`, `Texto`, or
+`data_output`. The active tree uses `reports/paper`, `paper`, `presentation`,
+`qgis`, `data/processed`, and `data/results`.
+
+## Current Dissertation Text
+
+The main current dissertation artifacts in `paper/` are:
+
+```text
+paper/defesa.docx
+paper/defesa_20260530.pdf
+paper/_dissertation.txt
+paper/_unpacked/
+paper/qualificacao_20260326.docx
+```
+
+`paper/_dissertation.txt` is an extracted text snapshot from the current
+dissertation document and is useful for grep-style inspection. It may display
+mojibake in the terminal, but it reflects the current document structure.
+
+Current title:
+
+```text
+Transporte ate a periferia ou moradia no centro: analise custo-beneficio de
+alternativas para promover acessibilidade urbana em Sao Paulo a partir de um
+modelo de equilibrio espacial
+```
+
+Current dissertation sections visible in the extracted text:
+
+```text
+1. Introducao
+2. Revisao de literatura
+3. Metodologia
+4. Resultados
+5. Discussao
+Referencias bibliograficas
+Apendices A-I
+```
+
+The text has already incorporated many of the latest project updates: 343 Sao
+Paulo OD zones, 18 excluded zones, final CSM sample of 325 zones, 15 Line 6
+stations, 23-minute terminal-to-terminal runtime, 75-second headway, the
+lower-envelope correction for the transport matrix, welfare gains of about
+0.603% and 0.504%, and the revised cost-benefit framing.
+
+Still verify the document before editing. The Word/PDF/text snapshots can drift
+from each other if Vitor edits one outside the pipeline.
+
+## Current Script Pipeline
+
+The live R pipeline is numbered as follows:
+
+```text
+scripts/
+  _config/
+    paths.R
+
+  01_od_shapes/
+    01_01.R
+    01_02.R
+
+  02_workers/
+    02_01.R
+
+  03_land_area/
+    03_01.R
+    03_02.R
+
+  04_floorspace_prices/
+    04_01.R
+    04_02.R
+    04_03.R
+    04_04.R
+    04_05.R
+    04_06.R
+
+  05_final_dataset/
+    05_01.R
+
+  06_travel_times/
+    06_01.R
+    06_02.R
+    06_03.R
+    06_04.R
+    06_05.R
+
+  07_model_parameters/
+    07_01.R
+    07_02.R
+    07_03.R
+
+  08_baseline_scenario/
+    08_01.R
+    08_02.R
+    08_03.R
+
+  09_transport_intervention/
+    09_01.R
+    09_02.R
+    09_03.R
+    09_04.R
+    09_05.R
+    09_06.R
+    09_07.R
+    09_08.R
+
+  10_land_use_intervention/
+    10_01.R
+    10_02.R
+    10_03.R
+    10_04.R
+    10_05.R
+    10_06.R
+
+reports/
+  scripts/
+    diagnostics, validation, plotting, welfare decomposition, CBA helpers
+```
+
+Do not reintroduce older numbering such as `07_travel_times`,
+`08_model_parameters`, `09_baseline_scenario`, `11_land_use_intervention`, or
+`12_counterfactual_scenarios` unless Vitor asks for a renumbering. Some older
+reports and memory entries use those names; map them mentally to the current
+live folders above. The counterfactual solves are now integrated into the
+intervention stages: `09_08.R` solves the transport scenario and `10_06.R`
+solves the land-use scenario.
+
+## R Style
+
+When editing or creating R scripts, match the local style:
+
+- Use large `################################################################################` banner headers.
+- Start pipeline scripts with a numbered uppercase title matching the filename.
+- Split scripts into Roman-numeral sections.
+- Add explicit action comments before conceptual blocks.
+- Use comments such as `Reading...`, `Creating...`, `Filtering...`,
+  `Computing...`, `Joining...`, `Renaming...`, `Saving...`, `Estimating...`,
+  `Solving...`, and `Measuring...`.
+- Keep commented package installation lines and `library(...)` calls matched
+  one-to-one for the packages effectively used in that script.
+- Load libraries near the top.
+- Declare input and output paths near the beginning as named objects.
+- Create output directories directly with `dir.create(..., recursive = TRUE,
+  showWarnings = FALSE)` in every script that writes outputs. Do not wrap
+  `dir.create()` in `if (!dir.exists(...))`.
+- Keep sanity checks, compliance checks, validation checks, and diagnostic
+  assertions out of the main production pipeline; use `reports/scripts/` for
+  those checks.
+- Use `snake_case`.
+- Use `<-`.
+- Keep transformations stepwise and readable.
+- Prefer explicit function arguments.
+- Group exports at the end.
+- Export CSV/RDS/GPKG/Parquet combinations when the surrounding pipeline does.
+- Use `sf::sf_use_s2(FALSE)` in geometry scripts when consistent with local
+  code.
+
+Avoid broad refactors. The pipeline is meant to be auditable by Vitor, not
+compressed for style.
+
+## Data and Model Units
+
+The empirical base is the 2023 Metro-SP Origin-Destination survey for Sao
+Paulo, ITBI real estate transactions, GeoSampa layers, SPTrans GTFS, OSM, RAIS
+/ related references where relevant, and calibrated CSM inputs.
+
+Key current data facts:
+
+```text
+OD zones in Sao Paulo:      343
+Excluded zones:             18
+Final CSM sample:           325
+Travel-time full matrix:    343 x 343
+Travel-time CSM matrix:     325 x 325
+ITBI filtered transactions: 1,758,647
+```
+
+`residents` and `workplaces` are not literal total population and total jobs.
+They are weighted OD worker masses:
+
+- `residents`: active workers living in each origin zone.
+- `workplaces`: active workers working in each destination zone.
+
+Because the same worker sample is used on both sides, the sums should match
+under the closed labor-market interpretation. In scenario outputs, read these
+as resident-worker and workplace-worker masses.
+
+`floorspace_price` in CSM inversion/scenario outputs is a normalized price
+index, not raw BRL per square meter. When the land-use policy needs a monetary
+construction cost, the current implementation uses the SINAPI-SP 2025
+construction-cost scalar, not the normalized CSM price.
+
+## Key Pipeline Stages
+
+### 01 OD Shapes
+
+Processes OD 2023 survey/geography and Sao Paulo OD zones.
+
+Expected products include:
+
+```text
+data/processed/shapes/od_2023_shapes.*
+data/processed/shapes/od_2023_survey.*
+```
+
+The project projection for area/spatial calculations is SIRGAS 2000 / UTM 23S
+(`EPSG:31983`). Station lat/lon values for GTFS are derived in `EPSG:4326`.
+
+### 02 Workers
+
+Builds resident-worker and workplace-worker masses from OD 2023. Use
+`fe_pess`-weighted active workers. Keep the interpretation explicit in text:
+the CSM sample is a worker/economically active resident mass, not the whole
+municipal population.
+
+### 03 Land Area
+
+Downloads/processes land-area and developable-area inputs. Keep the current
+usable/developable land-area logic unless Vitor asks for a conceptual change.
+
+### 04 Floorspace Prices
+
+Downloads, binds, geocodes, deflates, filters, and aggregates ITBI
+transactions. The final `price` is the median price per square meter by zone,
+not a mean. The final dataset keeps a transaction-count criterion; the current
+sample has 325 zones after excluding 18.
+
+### 05 Final Dataset
+
+Merges shapes, residents, workplaces, prices, and land area into the CSM input
+dataset.
+
+Canonical live products are under:
+
+```text
+data/processed/final_dataset/
+```
+
+Do not use old references to `data/processed/complete_dataset` or nested
+`od_2023` / `igccsm` folders as current.
+
+### 06 Travel Times
+
+Builds the baseline r5r travel-time matrix from SPTrans GTFS and OSM.
+
+Important operational settings:
+
+```r
+options(java.parameters = "-Xmx8G")
+time_window <- 60
+draws_per_minute <- 5
+departure_datetime <- as.POSIXct("2025-12-01 08:00:00")
+```
+
+Both baseline and counterfactual r5r scripts use `build_network(...,
+overwrite = FALSE)`. If GTFS or OSM inputs are changed, check whether a stale
+`network.dat` is being reused. Rebuild the network deliberately when needed.
+
+Earlier notes describe a deterministic one-minute setup. That is stale for the
+live scripts. The current scripts use a 60-minute window and 5 draws per minute
+to reduce GTFS frequency-offset noise.
+
+### 07 Model Parameters
+
+Estimates/calibrates the parameter table.
+
+Important current parameters and interpretations:
+
+```text
+theta   = 7
+epsilon = about 0.0062
+varrho  = 0
+sh_city = 1
+```
+
+The commuting semielasticity is estimated with PPML on OD flows and travel
+times. The reported semielasticity is about `-0.0436`; with `theta = 7`, this
+maps to `epsilon` around `0.0062`.
+
+`varrho = 0` and `sh_city = 1` impose the closed-city interpretation: scenario
+solves redistribute a fixed worker mass instead of changing aggregate city
+population.
+
+### 08 Baseline Scenario
+
+Runs model inversion and baseline equilibrium solve.
+
+Expected result folder:
+
+```text
+data/results/baseline_scenario/
+```
+
+Important outputs include:
+
+```text
+model_inversion.*
+baseline_scenario.*
+```
+
+Keep the distinction between fundamentals and equilibrium objects:
+
+```text
+production_fundamentals    = a
+residential_fundamentals   = b
+productivity               = A
+amenities                  = B
+density_land_development   = varphi
+welfare                    = u
+market_access              = W
+firm_market_access         = F
+share_commercial_floorspace = ttheta
+```
+
+Do not expect `lambda_ij_i` or baseline commute-share files under the current
+`IGC.CSM 0.3.1` workflow. The package does not return that object. If commute
+shares are needed later, reconstruct them explicitly from the model formula or
+modify/use a local wrapper that exposes internals.
+
+### 09 Transport Intervention
+
+Builds the Line 6-Orange intervention and its counterfactual travel-time
+matrix.
+
+Current Line 6 specification:
+
+```text
+Stations: 15
+Terminal-to-terminal runtime: 23 minutes
+Runtime seconds: 1,380
+Inter-station gaps: about 98/99 seconds
+Headway: 75 seconds across the line
+Operation window in GTFS builder: 04:00 to 23:59
+GTFS addition: 1 route, 2 trips, 15 stops, 30 stop_times, 40 frequency rows,
+               1,928 shape rows, 3 fare_rules
+Packaged GTFS: data/processed/interventions/transport_intervention/r5r_core/sptrans_line6_gtfs.zip
+```
+
+The current Line 6 station order runs from Sao Joaquim to Brasilandia:
+
+```text
+Sao Joaquim
+Bela Vista
+14 Bis
+Higienopolis-Mackenzie
+FAAP-Pacaembu
+PUC-Cardoso de Almeida
+Perdizes
+Sesc Pompeia
+Agua Branca
+Santa Marina
+Freguesia do O
+Joao Paulo I
+Itaberaba-Hospital Vila Penteado
+Vila Cardoso
+Brasilandia
+```
+
+The projected metro WFS layers previously validated were:
+
+```text
+geoportal:estacao_metro_projetada
+geoportal:linha_metro_projetada
+```
+
+The Line 6 intervention uses `cd_identificador == 21` in the projected line
+layer. If GeoSampa schemas change, re-check this rather than assuming it still
+holds.
+
+Compatibility details that matter:
+
+- Preserve original GTFS table names and ZIP-root layout.
+- Preserve original fare IDs exactly when editing GTFS tables.
+- `tar -tf` / `tar -xf` worked as a reliable inspection fallback on this
+  Windows machine when other ZIP readers failed or files were locked.
+- The recalibrated 23-minute / 75-second feed was audited as internally
+  consistent, but it makes Line 6 the fastest metro line in the GTFS relative
+  to existing rail services. Treat this as an explicit policy specification,
+  not an accidental result.
+
+### 10 Land-Use Intervention
+
+Builds the central densification shock.
+
+Current policy interpretation:
+
+```text
+Policy: PPP Centro Historico / central densification
+Common budget: R$ 10.3 billion
+Construction-cost scalar: SINAPI-SP 2025
+Additional built area: about 5,289,187 m2
+Baseline affected-ring built area: about 18,959,910 m2
+Density increase: about +27.876%
+Target zones: od_001, od_002, od_003, od_004, od_005, od_006, od_035, od_036
+```
+
+The current code applies a uniform proportional density increase to each of the
+eight affected zones. This is not the same as allocating the same subsidy
+amount to each zone. If the dissertation text claims equal per-zone subsidy,
+either rewrite the text or rebuild the density input.
+
+Expected outputs include:
+
+```text
+data/processed/interventions/land_use_intervention/counterfactual_density.*
+data/processed/interventions/land_use_intervention/affected_zones.*
+```
+
+### Counterfactual Scenario Solves
+
+Solves the two CSM counterfactual equilibria:
+
+```text
+scripts/09_transport_intervention/09_08.R  transport scenario
+scripts/10_land_use_intervention/10_06.R   land-use scenario
+```
+
+The transport scenario intentionally applies the lower-envelope correction:
+
+```r
+matrix <- pmin(matrix, baseline_matrix)
+```
+
+Keep this unless Vitor explicitly asks to test another interpretation. It
+encodes the additive-policy assumption that adding Line 6 expands the feasible
+route set and should not force a traveler to abandon a better baseline route.
+It also removes r5r/GTFS draw noise that can make some OD pairs look worse.
+
+Expected result folders:
+
+```text
+data/results/transport_scenario/
+data/results/land_use_scenario/
+```
+
+Expected outputs:
+
+```text
+transport_scenario.*
+transport_variation.*
+land_use_scenario.*
+land_use_variation.*
+```
+
+## Current Results to Preserve Unless Recomputed
+
+The current dissertation/report interpretation is:
+
+```text
+Transport aggregate welfare gain: about +0.603%
+Land-use aggregate welfare gain: about +0.504%
+Both policies: welfare gains in all 325 CSM zones
+Transport: larger aggregate BCR and stronger Line 6 corridor tail
+Land-use: lower aggregate BCR but more spatially uniform welfare floor
+```
+
+More detailed current facts from the latest reports/text:
+
+```text
+Transport max zonal welfare gain: about +5.276% in od_123
+Land-use welfare range: about +0.413% to +1.480%
+Land-use affected zones: about +6.8% residents, +14.9% workplaces,
+                         about -8.1% floorspace prices, about +1.46%
+                         welfare on average/in the treated ring
+Land-use: all 325 zones have lower floorspace prices
+Land-use: all 325 zones have higher wages, income, and market access
+```
+
+The spatial comparison in the current dissertation text/report is no longer
+the older "transport dominates almost everywhere" story. The current
+zone-level comparison says:
+
+```text
+Land-use higher welfare gain: 220 zones
+Transport higher welfare gain: 78 zones
+Tie: 27 zones
+```
+
+Interpretation: transport wins the aggregate BCR and corridor gains; land-use
+wins more zones by a smaller, diffuse margin and has a higher welfare floor.
+Do not rewrite the conclusion as if one policy is universally superior.
+
+## Welfare Decomposition and CBA
+
+The most important current source for decomposition and CBA is:
+
+```text
+reports/paper/codex_csm_land_use_equilibrium_audit.qmd
+```
+
+The helper script/cache behind it is:
+
+```text
+reports/scripts/welfare_decomp_landuse.R
+reports/paper/_decomp_cache/
+```
+
+The decomposition uses the CSM welfare identity and a Frechet-style market
+access decomposition. In plain terms:
+
+- Transport welfare is mostly the commute-cost subchannel of market access.
+- Land-use welfare is roughly split between the wage/market-access channel and
+  the floorspace-price relief channel.
+- Land-use has no commute-time subchannel because the travel-time matrix is
+  unchanged in that scenario.
+
+Current CBA convention in the dissertation text:
+
+```text
+Annual reference income: R$ 32,626.98 per worker
+Monthly equivalent: R$ 2,718.92
+Closed-city population/reference worker count: 6,352,835
+Transport annual CV per worker: R$ 217.01
+Land-use annual CV per worker: R$ 181.33
+Transport annual aggregate CV: about R$ 1.379 billion/year
+Land-use annual aggregate CV: about R$ 1.152 billion/year
+Common cost: R$ 10.3 billion
+Central BCR case: 30 years, 5% real discount rate
+Transport central BCR: about 2.06
+Land-use central BCR: about 1.72
+Restrictive 20-year / 8% case: transport about 1.31, land-use about 1.10
+```
+
+Older reports or presentation audits mention annual benefits around
+R$ 5.21 billion/year and R$ 2.28 billion/year. Those were mechanical rescalings
+from an older dissertation monetary conversion. The current dissertation text
+uses the household-per-capita-income convention from OD 2023:
+R$ 2,718.92/month and R$ 32,626.98/year. If changing the CBA again, state the
+income convention explicitly and recompute all annual benefits, PVs, BCRs, and
+prose together.
+
+## Reports and Source-of-Truth Files
+
+Current report folder:
+
+```text
+reports/paper/
+```
+
+Important current reports:
+
+```text
+reports/paper/codex_atualizando_texto.qmd
+reports/paper/codex_csm_baseline_inversion_audit.qmd
+reports/paper/codex_csm_transport_matrix_audit.qmd
+reports/paper/codex_csm_transport_equilibrium_audit.qmd
+reports/paper/codex_csm_land_use_density_audit.qmd
+reports/paper/codex_csm_land_use_equilibrium_audit.qmd
+reports/paper/codex_csm_policy_comparison_spatial_cba.qmd
+reports/paper/codex_csm_pipeline_mapping.qmd
+reports/paper/codex_gravity_commuting_semielasticity.qmd
+reports/paper/claude_dados_descricao_checklist.qmd
+reports/paper/claude_validation_r5r_od.qmd
+reports/paper/claude_validation_r5r_car.qmd
+reports/paper/claude_validation_r5r_od_transit_car.qmd
+reports/paper/codex_insper_cidades_presentation_audit.qmd
+```
+
+`reports/paper/codex_atualizando_texto.qmd` is the main Portuguese roadmap for
+what needed to be updated in the dissertation text. It is especially useful
+for editorial continuity. It contains:
+
+- mandatory updates to data, Line 6, land-use, results, CBA, and conclusion;
+- the current BCR and welfare interpretation;
+- notes on Sao Paulo literature and stylized facts;
+- r5r validation appendix routing;
+- theoretical/model-exposition improvements;
+- terminology fixes such as using `preco do metro quadrado`, not `preco do
+  solo`;
+- the recommended order for dissertation editing.
+
+`reports/paper/codex_csm_land_use_equilibrium_audit.qmd` is the best current
+technical source for the final comparison because it integrates the latest
+land-use solve, transport comparison, welfare decomposition, and CBA.
+
+`reports/paper/codex_csm_transport_matrix_audit.qmd` and
+`reports/paper/codex_csm_transport_equilibrium_audit.qmd` are the key sources
+for the post-recalibration Line 6 transport counterfactual.
+
+`reports/paper/codex_gravity_commuting_semielasticity.qmd` is the source for
+the commuting semielasticity / `epsilon` discussion.
+
+The report helper scripts live under:
+
+```text
+reports/scripts/
+```
+
+Do not move report scripts into the main pipeline unless Vitor asks. They are
+diagnostics/figures/report-production helpers, not all part of the core
+pipeline.
+
+## Dissertation Text Issues and Editorial Continuity
+
+The current text is much more up to date than the older qualification draft,
+but future agents should still check for:
+
+- placeholders in pre-textual sections (`Resumo`, `Abstract`, dedication,
+  epigraph, examiner names, final page count);
+- figure/table numbering inconsistencies, especially duplicate Figure 17/18
+  patterns after Word/PDF updates;
+- whether all maps in appendices match the latest `reports/tables` QGIS class
+  breaks and `paper/maps`/`paper/plots` outputs;
+- consistency between `paper/defesa.docx`, `paper/defesa_20260530.pdf`, and
+  `paper/_dissertation.txt`;
+- whether the CBA income convention is consistently described as
+  household-per-capita income from OD 2023, and whether the worker count
+  convention is clearly tied to the closed-city model;
+- whether "market access", "accessibilidade", "bem-estar", "Linha 6-Laranja",
+  "uso do solo", and "preco do metro quadrado" are used consistently;
+- whether the theoretical appendix and main text preserve the distinction
+  between fundamentals (`a`, `b`) and equilibrium objects (`A`, `B`, `Q`, `W`,
+  `u`);
+- whether the conclusion says "transport has the higher aggregate BCR, land-use
+  has broader spatial coverage/floor" instead of declaring a universal winner.
+
+For literature/text updates, the roadmap identified these local references as
+especially relevant:
+
+```text
+Anagol, Ferreira, Rexer (2023)
+Costa et al. (2021)
+Costa, Zegras, Zheng (2025)
+Moreno-Monroy, Ramos (2021)
+Vieira (2026)
+```
+
+Reopen the actual PDFs/files before adding citations or changing claims.
+
+## QGIS and Map Classification
+
+The active QGIS workflow is documented in `qgis/README.md`. Its versioned
+contents are deliberately limited to:
+
+```text
+qgis/layers/
+qgis/projects/everything.qgz
+qgis/scripts/01_*.py
+qgis/scripts/02_*.py
+qgis/scripts/03_*.py
+qgis/scripts/04_*.py
+qgis/scripts/run_qgis_python.ps1
+qgis/templates/
+```
+
+The local reference layers were downloaded manually from GeoSampa or IBGE.
+Project sources are relative to `qgis/projects/`, including model inputs and
+results under `data/`. OpenStreetMap is the only remote map source.
+
+The numbered scripts update symbology, apply layout templates, validate the
+stored project, and export the 22 scenario maps. Generated classification
+reports, project backups, caches, migration helpers, debugging scripts, and
+rendered map images remain local and are excluded from Git.
+
+Important map reading:
+
+- `aggregate_welfare` is constant across zones; do not map it as a graduated
+  spatial variable.
+- `total_population` is zero variation under closed-city closure; do not map it
+  as a policy effect.
+- `share_commercial_floorspace` is numerical zero in variation tables; avoid
+  treating tiny numerical noise as a substantive map.
+- For welfare, use class breaks that reveal the small but meaningful variation
+  rather than default continuous scales that hide the signal. The validated
+  counterfactual palette is zero-centered, with negative values in red,
+  positive values in blue, and near-zero classes close to white.
+
+## Environment Notes
+
+Observed local tools and conventions:
+
+```text
+Shell:     PowerShell on Windows
+Rscript:   C:/Program Files/R/R-4.6.0/bin/Rscript.exe
+R library: C:/Users/vitor/R/win-library/4.6
+R cache:   C:/Users/vitor/R/cache
+Java:      C:/Program Files/Eclipse Adoptium/jdk-25.0.3.9-hotspot/
+Python:    C:/Users/vitor/.venvs/datascience/Scripts/python.exe
+Quarto:    may be available on PATH, or through the RStudio bundle
+Pandoc:    may be available through the RStudio Quarto bundle
+```
+
+See `AMBIENTES.md` for the current environment policy. Do not recreate a
+project-local `.Rlib`, `.venv`, or `.python_lib`. Regular Python projects use
+the shared `C:/Users/vitor/.venvs/datascience` environment. QGIS scripts run
+through `qgis/scripts/run_qgis_python.ps1` and use the Python runtime bundled
+with the installed QGIS version. The project was last validated with QGIS
+4.2.0 and Python 3.12; that runtime must provide `pyarrow`.
+The shared environment's `Scripts` directory is first in the user `PATH`, and
+Positron selects its Python executable by default.
+
+If `Rscript` is not on PATH, call the full path. If `quarto` or `pandoc` is not
+on PATH, check:
+
+```text
+C:/Program Files/RStudio/resources/app/bin/quarto/bin/quarto.exe
+C:/Program Files/RStudio/resources/app/bin/quarto/bin/tools/pandoc.exe
+```
+
+Previously verified RStudio-bundled versions were Quarto `1.9.36` and Pandoc
+`3.8.3`, but verify live if rendering matters.
+
+Common packages in this project include:
+
+```text
+tidyverse
+sf
+arrow
+geoarrow
+r5r
+rJava
+rJavaEnv
+geosphere
+httr
+fixest
+kableExtra
+patchwork
+```
+
+For OpenStreetMap clipping, do not blindly re-add `--complete-ways` to
+`osmconvert`; it previously produced an empty PBF on this machine. Use
+`utils::shortPathName()` when needed because this project path contains spaces
+and an accented folder name. After downloading `.exe` files, verify `MZ` magic
+bytes before executing.
+
+## Git State and Policy
+
+This is a Git repository. Repository-local identity has been:
+
+```text
+user.name  = Vitor Theodoro Carboni
+user.email = vitheodorocarboni@gmail.com
+```
+
+Recent commits observed on 2026-06-06:
+
+```text
+7d966e6 Atualiza resultados da dissertacao
+aad7b3c Versiona arquivos docx e incorpora atualizacoes do capitulo 3
+8d0e282 Atualiza texto e ignora cache temporario
+e9f7240 Reorganiza reports, atualiza pipeline e adiciona validacoes
+ff5f865 Simplifica scripts de parametros do modelo (07)
+```
+
+The local Git status observed before this handoff edit included:
+
+```text
+ D paper/defesa_20260527.docx
+?? .codex_tmp_discussion_source.txt
+?? .codex_tmp_final_email_read.txt
+?? .codex_tmp_for_discussion.txt
+?? .codex_tmp_for_intro_rewrite.txt
+?? paper/_dissertation.txt
+?? paper/_unpacked/
+?? paper/defesa.docx
+```
+
+Do not assume these are all yours to stage. The deleted old docx and untracked
+new docx/text/unpacked files likely reflect Vitor's document-update workflow.
+Inspect and ask or follow Vitor's explicit commit instruction before staging
+large document artifacts.
+
+The `.gitignore` intentionally ignores:
+
+```text
+.Rhistory
+.RData
+.RDataTmp
+.Rprofile
+.Rproj.user/
+rjavaenv/
+.Rlib/
+.Rlib_old/
+.venv/
+venv/
+env/
+.python_lib/
+.claude/
+.codex_tmp/
+data/
+*.pdf
+*.pptx
+*.jpeg
+*.jpg
+*.png
+reports/paper/*.pdf
+reports/paper/*_files/
+reports/paper/*_cache/
+paper/plots/
+*.qgz~
+*.qgs~
+*.gpkg-shm
+*.gpkg-wal
+Thumbs.db
+Desktop.ini
+.DS_Store
+.positai
+```
+
+Tracked project material should usually include:
+
+```text
+README.qmd
+.gitignore
+.here
+Dissertacao.Rproj
+scripts/
+reports/paper/*.qmd
+reports/paper/*.md
+reports/tables/*.md or small reproducible table sources
+qgis/README.md
+qgis/layers/
+qgis/projects/everything.qgz
+qgis/scripts/01_*.py through qgis/scripts/04_*.py
+qgis/scripts/run_qgis_python.ps1
+qgis/templates/
+small reproducible demo files under igc/
+```
+
+Do not add data outside the already approved tracked subset, generated QGIS
+classification reports, QGIS backups, rendered PDFs, slides, large images,
+Word documents, or large reference PDFs unless Vitor explicitly asks for that
+strategy. If additional large artifacts must be versioned, discuss Git LFS or
+another storage approach first.
+
+The repo can show warnings like:
+
+```text
+unable to access 'C:/Users/vitor/.config/git/ignore': Permission denied
+```
+
+That warning has not blocked local `.gitignore` use. OneDrive repositories can
+also run into `.git/index.lock` or permission issues. Verify state and retry
+carefully rather than changing scope.
+
+## Things Future Agents Should Not Regress
+
+- Do not change the active pipeline numbering back to older folder names.
+- Do not use old sample size claims (`326` kept / `17` excluded) unless
+  recomputed; current text and pipeline use `325` kept / `18` excluded.
+- Do not describe Line 6 as 14 stations; current specification is 15 stations.
+- Do not revert Line 6 to 28 minutes or 180-second headway; current user-chosen
+  specification is 23 minutes and 75 seconds.
+- Do not remove the `pmin(counterfactual, baseline)` lower-envelope correction
+  from the transport solve without an explicit methodological decision.
+- Do not treat land-use as negligible. Current welfare gain is about 0.504%,
+  close to transport's 0.603%.
+- Do not describe land-use as an equal per-zone subsidy unless the density file
+  is rebuilt; current implementation is a uniform proportional density shock.
+- Do not use normalized CSM `floorspace_price` as a monetary construction cost.
+  The land-use monetary conversion uses SINAPI-SP.
+- Do not expect `lambda_ij_i` outputs from `IGC.CSM 0.3.1`.
+- Do not map constant variables such as `aggregate_welfare` as spatial
+  variation.
+- Do not assume rendered PDFs/docx are tracked just because they exist.
+- Do not trust old references to `paper/reports`; current reports are in
+  `reports/paper`.
+- Do not assume terminal mojibake means files are corrupt.
+
+## Fast Orientation Checklist
+
+For a new Codex account continuing this project:
+
+1. Read this file.
+2. Run `git status --short` before editing.
+3. Inspect `paper/_dissertation.txt` and/or `paper/defesa.docx` if changing
+   dissertation prose.
+4. Inspect `reports/paper/codex_atualizando_texto.qmd` for the Portuguese
+   editorial roadmap.
+5. Inspect `reports/paper/codex_csm_land_use_equilibrium_audit.qmd` for the
+   current welfare, decomposition, and CBA interpretation.
+6. Inspect the live script folder names with `rg --files scripts`.
+7. Source `scripts/_config/paths.R` in R work instead of hard-coding paths.
+8. If touching transport, reopen `scripts/09_transport_intervention/09_03.R`,
+   `09_05.R`, `09_07.R`, and `scripts/09_transport_intervention/09_08.R`.
+9. If touching land-use, reopen `scripts/10_land_use_intervention/10_05.R`
+   and `scripts/10_land_use_intervention/10_06.R`.
+10. If touching CBA, recompute benefits/PVs/BCRs and update prose, tables, and
+    figures together.
+
+## Collaboration Rule
+
+Be conservative, concrete, and explicit. This project is near dissertation
+delivery, so the main risk is not lack of creativity; it is accidental drift
+between code, reports, maps, and the Word/PDF text. Keep the artifacts aligned.

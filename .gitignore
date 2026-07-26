@@ -1,0 +1,62 @@
+# Local R state
+.Rhistory
+.RData
+.RDataTmp
+.Rprofile
+.Rproj.user/
+
+# Local environments and caches
+rjavaenv/
+.Rlib/
+.Rlib_old/
+.venv/
+venv/
+env/
+.python_lib/
+__pycache__/
+.claude/
+.codex_tmp/
+.tools/
+.quarto-local/
+
+# Data and generated model outputs
+data/
+
+# Rendered documents and presentation outputs
+*.pdf
+*.pptx
+*.docx
+*.jpeg
+*.jpg
+*.png
+reports/paper/*.pdf
+reports/paper/*_files/
+reports/paper/*_cache/
+paper/plots/
+
+# QGIS project backups and transient files
+*.qgz~
+*.qgs~
+*.gpkg-shm
+*.gpkg-wal
+qgis/.qgis_config/
+qgis/classifications/
+qgis/projects/*.backup_*.qgz
+qgis/scripts/__pycache__/
+
+# Superseded QGIS maintenance and debugging helpers
+qgis/scripts/check_transport_layout_legend_entries.py
+qgis/scripts/debug_symbology_coverage.py
+qgis/scripts/debug_transport_export.py
+qgis/scripts/regularize_layout_paths_after_reorg.py
+qgis/scripts/regularize_project_paths_after_reorg.py
+qgis/scripts/regularize_unavailable_layer_paths.py
+qgis/scripts/run_qgis_python_403.bat
+qgis/scripts/sync_text_transport_layout_context_legends.py
+qgis/scripts/update_transport_layout_legends.py
+
+# Operating system files
+Thumbs.db
+Desktop.ini
+.DS_Store
+.positai
