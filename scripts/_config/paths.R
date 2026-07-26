@@ -47,6 +47,16 @@ find_project_root <- function(start = getwd()) {
     parent <- dirname(current)
     
     # Stopping execution if the root marker cannot be found
+    if (identical(parent, current)) {
+      stop(
+        "Project root marker '.here' was not found from: ",
+        normalizePath(
+          path     = start,
+          winslash = "/",
+          mustWork = TRUE
+        )
+      )
+    }
     
     # Updating the current directory
     current <- parent
