@@ -6,6 +6,7 @@
 .Rproj.user/
 
 # Local environments and caches
+AMBIENTES.md
 rjavaenv/
 .Rlib/
 .Rlib_old/
