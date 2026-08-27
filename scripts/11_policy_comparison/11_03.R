@@ -49,6 +49,13 @@ compensating_variation_output_file <- file.path(output_directory, "compensating_
 # Setting benefit-cost ratio output file path
 benefit_cost_output_file <- file.path(output_directory, "benefit_cost_ratio.parquet")
 
+# Setting the Figure 17 output path
+bcr_plot_directory <- project_path("paper", "plots")
+bcr_plot_output_file <- file.path(
+  bcr_plot_directory,
+  "policy_comparison_bcr_sensitivity_pt.png"
+)
+
 
 ################################################################################
 ##### III. Data
@@ -144,12 +151,95 @@ benefit_cost_ratio <- compensating_variation %>%
 
 
 ################################################################################
-##### VII. Exporting outputs
+##### VII. Plotting benefit-cost ratios
+################################################################################
+
+# Formatting values with the Brazilian decimal separator used in the dissertation
+format_decimal_pt <- function(x) {
+  formatC(x, format = "f", digits = 2, decimal.mark = ",")
+}
+
+# Building the data displayed in Figure 17 from the exact Parquet output object
+bcr_plot_data <- benefit_cost_ratio %>%
+  mutate(
+    scenario = recode(
+      scenario,
+      transport = "Transporte",
+      land_use  = "Adensamento"
+    ),
+    scenario = factor(scenario, levels = c("Transporte", "Adensamento")),
+    horizon = factor(horizon, levels = horizons),
+    discount_rate_label = paste0(
+      "Taxa real de desconto: ",
+      round(discount_rate * 100),
+      "%"
+    )
+  )
+
+# Drawing the sensitivity grid used as Figure 17 in the dissertation
+bcr_plot <- ggplot(
+  bcr_plot_data,
+  aes(x = horizon, y = benefit_cost_ratio, fill = scenario)
+) +
+  geom_hline(
+    yintercept = 1,
+    linetype = "dashed",
+    colour = "#777777",
+    linewidth = 0.4
+  ) +
+  geom_col(
+    position = position_dodge(width = 0.78),
+    width = 0.68
+  ) +
+  geom_text(
+    aes(label = format_decimal_pt(benefit_cost_ratio)),
+    position = position_dodge(width = 0.78),
+    vjust = -0.35,
+    size = 3
+  ) +
+  facet_wrap(~discount_rate_label, nrow = 1) +
+  scale_fill_manual(
+    values = c(
+      "Transporte" = "#BA1F33",
+      "Adensamento" = "#2B6CB0"
+    )
+  ) +
+  scale_y_continuous(
+    name = "Razão benefício-custo (B/C)",
+    limits = c(0, 3.6),
+    breaks = 0:3,
+    expand = expansion(mult = c(0, 0))
+  ) +
+  labs(
+    x = "Horizonte (anos)",
+    fill = NULL
+  ) +
+  theme_minimal(base_size = 10) +
+  theme(
+    panel.grid.minor = element_blank(),
+    panel.grid.major.x = element_blank(),
+    strip.text = element_text(face = "bold"),
+    legend.position = "bottom",
+    legend.text = element_text(size = 9),
+    axis.title = element_text(size = 10),
+    axis.text = element_text(size = 9)
+  )
+
+
+################################################################################
+##### VIII. Exporting outputs
 ################################################################################
 
 # Creating output directory
 dir.create(
   path         = output_directory,
+  recursive    = TRUE,
+  showWarnings = FALSE
+)
+
+# Creating the directory for the dissertation figure
+dir.create(
+  path         = bcr_plot_directory,
   recursive    = TRUE,
   showWarnings = FALSE
 )
@@ -164,4 +254,15 @@ write_parquet(
 write_parquet(
   x    = benefit_cost_ratio,
   sink = benefit_cost_output_file
+)
+
+# Saving Figure 17 at its original 2520 x 1320 pixel resolution
+ggsave(
+  filename = bcr_plot_output_file,
+  plot     = bcr_plot,
+  width    = 8.4,
+  height   = 4.4,
+  units    = "in",
+  dpi      = 300,
+  bg       = "white"
 )

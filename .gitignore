@@ -23,6 +23,23 @@ __pycache__/
 # Data and generated model outputs
 data/
 
+# Local working materials outside the shared replication repository
+paper/
+conferences/
+igc/
+literature/
+presentation/
+Assistente do Adriano/
+tmp/
+readme_style.qmd
+task.md
+
+# Local editor configuration and Quarto/Typst intermediates
+*.Rproj
+*.code-workspace
+**/.quarto/
+*.typ
+
 # Rendered documents and presentation outputs
 *.pdf
 *.pptx

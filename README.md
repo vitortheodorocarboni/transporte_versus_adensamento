@@ -131,7 +131,7 @@ desenvolvimento a oito zonas centrais. A magnitude é calculada para manter o
 mesmo orçamento de R$ 10,3 bilhões atribuído à intervenção de transporte.
 
 Nos resultados arquivados, o ganho agregado de bem-estar é de aproximadamente
-0,603% no cenário de transporte e 0,504% no cenário de uso do solo. Esses
+0,641% no cenário de transporte e 0,546% no cenário de uso do solo. Esses
 valores devem ser recalculados se os dados, parâmetros ou especificações das
 políticas forem alterados.
 
